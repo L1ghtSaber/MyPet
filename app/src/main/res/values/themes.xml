@@ -15,18 +15,4 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
-
-    <style name="CalenderView.MonthAndSelectedDate" parent="Theme.AppCompat">
-        <item name="android:textColorPrimary">@color/red_orange</item>
-        <item name="colorAccent">@color/sky_blue</item>
-    </style>
-
-    <style name="CalenderView.Date" parent="android:TextAppearance.DeviceDefault.Medium">
-        <item name="android:textColor">@color/sunset_orange</item>
-    </style>
-
-    <style name="CalenderView.Week" parent="android:TextAppearance.DeviceDefault.Medium">
-        <item name="android:textColor">@color/gray</item>
-    </style>
-
 </resources>

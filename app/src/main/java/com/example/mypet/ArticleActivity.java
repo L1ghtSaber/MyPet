@@ -19,7 +19,7 @@ public class ArticleActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_article);
 
-        Pet.Article article = new Gson().fromJson(getIntent().getStringExtra(PetInfoActivity.ARTICLE_KEY), Pet.Article.class);
+        Pet.Article article = new Gson().fromJson(getIntent().getStringExtra(PetInfoActivity.KEY_ARTICLE), Pet.Article.class);
 
         ((LinearLayout) findViewById(R.id.article_title_background_LL))
                 .setBackgroundColor(Color.argb(64, article.RGB_themeColor[0], article.RGB_themeColor[1], article.RGB_themeColor[2]));

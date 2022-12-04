@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="10dp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/calendar_month_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:textColor="@color/red_orange"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/calendar_previous_year_IB"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:src="@drawable/arrow_back_small" />
+
+                <TextView
+                    android:id="@+id/calendar_year_IB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@color/red_orange"
+                    android:textSize="23sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/calendar_next_year_IB"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:rotation="180"
+                    android:src="@drawable/arrow_back_small" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end">
+
+            <ImageButton
+                android:id="@+id/calendar_previous_month_IB"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:src="@drawable/arrow_back" />
+
+            <ImageButton
+                android:id="@+id/calendar_next_month_IB"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:background="@null"
+                android:rotation="180"
+                android:src="@drawable/arrow_back" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/calendar_day_titles_container_LV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="7">
+
+        <include layout="@layout/calendar_day_title_item" />
+
+        <include layout="@layout/calendar_day_title_item" />
+
+        <include layout="@layout/calendar_day_title_item" />
+
+        <include layout="@layout/calendar_day_title_item" />
+
+        <include layout="@layout/calendar_day_title_item" />
+
+        <include layout="@layout/calendar_day_title_item" />
+
+        <include layout="@layout/calendar_day_title_item" />
+
+    </LinearLayout>
+
+</LinearLayout>

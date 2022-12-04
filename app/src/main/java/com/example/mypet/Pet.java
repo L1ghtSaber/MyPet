@@ -4,15 +4,18 @@ import java.util.ArrayList;
 
 public class Pet {
 
-    public static final int DEFAULT_RESOURCE_VALUE = -1;
+    public static final int DEFAULT_RESOURCE_VALUE = 0;
 
     public String name;
+    public ArrayList<Article> articles = new ArrayList<>();
+    public final int[] RGB_themeColor = new int[3]; // цвет текста, кружков у статей и т.д.
+
     public int buttonImageResource = DEFAULT_RESOURCE_VALUE, // картинка при выборе животных
             imageResource = DEFAULT_RESOURCE_VALUE; // картинка сверху в активнсоти со статьями
-    public final int[] RGB_themeColor = new int[3]; // цвет текста, кружков у статей и т.д.
-    public ArrayList<Article> articles = new ArrayList<>();
 
-    public Pet() {}
+    public Pet() {
+
+    }
 
     public static class Article {
 
@@ -27,7 +30,7 @@ public class Pet {
             this.title = title;
             this.text = text;
             this.imageResource = imageResource;
-            RGB_themeColor = pet.RGB_themeColor;
+            this.RGB_themeColor = pet.RGB_themeColor;
         }
     }
 
@@ -37,7 +40,7 @@ public class Pet {
             name = "Котята";
             buttonImageResource = R.drawable.two_kittens_in_garden;
             imageResource = R.drawable.four_kittens_with_flowers;
-            // 168, 76, 199
+
             RGB_themeColor[0] = 168;
             RGB_themeColor[1] = 76;
             RGB_themeColor[2] = 199;
@@ -45,9 +48,11 @@ public class Pet {
             articles.add(new Article("Чем кормить котенка?", "", "", DEFAULT_RESOURCE_VALUE, this));
             articles.add(new Article("Поход к ветеринару", "", "", DEFAULT_RESOURCE_VALUE, this));
             articles.add(new Article("Игры с котенком", "Шарик в лабиринте",
+
                     "Теннисный шарик можно поместить в упаковку для яиц, содержащую несколько " +
                             "десятков ячеек, и перекатывать его из одной в другую. Кошка будет " +
                             "пытаться его достать, и эта игра позабавит вас обоих!",
+
                     R.drawable.kitten_plays_with_balls_of_thread, this));
             articles.add(new Article("Как воспитать идеального котика?", "", "", DEFAULT_RESOURCE_VALUE, this));
         }

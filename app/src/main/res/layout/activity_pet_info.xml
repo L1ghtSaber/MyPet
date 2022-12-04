@@ -25,26 +25,25 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="50dp"/>
+        android:layout_height="50dp" />
 
     <ImageView
         android:id="@+id/pet_image_IV"
         android:layout_width="match_parent"
-        android:layout_height="200dp"/>
+        android:layout_height="200dp" />
 
     <TextView
         android:id="@+id/pet_name_TV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
         android:gravity="center"
-        android:textSize="50sp"/>
+        android:textAlignment="center"
+        android:textSize="50sp" />
 
     <ListView
         android:id="@+id/pet_articles_LV"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:divider="@null"/>
+        android:divider="@null" />
 
 </LinearLayout>

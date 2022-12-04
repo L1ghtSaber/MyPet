@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:orientation="vertical"
+    tools:context=".MakeReminderActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/reminder"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="23sp" />
+
+        <TextView
+            android:id="@+id/make_reminder_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:gravity="center"
+            android:onClick="makeReminder"
+            android:textSize="23sp" />
+
+        <TextView
+            android:id="@+id/delete_reminder_TV"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:gravity="center"
+            android:textColor="@color/sky_blue"
+            android:textSize="23sp" />
+
+    </FrameLayout>
+
+    <!--    Нужно для того, чтобы корректно поменять фон-->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/white">
+
+        <EditText
+            android:id="@+id/reminder_text_set_ET"
+            android:layout_width="375dp"
+            android:layout_height="75dp"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:hint="@string/reminder_text"
+            android:textSize="20sp" />
+
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+    <LinearLayout
+        android:layout_width="375dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/calendar_background_shape"
+        android:orientation="vertical">
+
+        <com.kizitonwose.calendar.view.CalendarView
+            android:id="@+id/writable_calendar_CV_lib"
+            android:layout_width="match_parent"
+            android:layout_height="420dp"
+            app:cv_dayViewResource="@layout/calendar_day_item"
+            app:cv_monthHeaderResource="@layout/calendar_header_item" />
+
+        <FrameLayout
+            android:layout_width="190dp"
+            android:layout_height="40dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/time"
+                android:textColor="@color/black"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/reminder_time_set_TV"
+                android:layout_width="90dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:background="@drawable/reminder_date_time_shape"
+                android:gravity="center"
+                android:onClick="setTime"
+                android:textColor="@color/black"
+                android:textSize="27sp" />
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

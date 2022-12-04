@@ -1,7 +1,11 @@
 <resources>
-    <string name="app_name">MyPet</string>
+    <string name="app_name">Мой любимчик</string>
     <string name="who_is_your_pet">Кто твой питомец?</string>
     <string name="calendar">Календарь</string>
     <string name="animals">Животные</string>
     <string name="back">Назад</string>
+    <string name="add_reminder">Добавить напоминание</string>
+    <string name="reminder">Напоминание</string>
+    <string name="time">Время</string>
+    <string name="reminder_text">Текст напоминания</string>
 </resources>

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class PetsActivity extends AppCompatActivity {
 
-    public static final String PET_KEY = "pet";
+    public static final String KEY_PET = "pet";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,21 +61,23 @@ public class PetsActivity extends AppCompatActivity {
 
             final Intent petInfo = new Intent(PetsActivity.this, PetInfoActivity.class);
             petBtn1.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View view) {
                     if (pets[0].imageResource == Pet.DEFAULT_RESOURCE_VALUE) return;
 
-                    petInfo.putExtra(PET_KEY, new Gson().toJson(pets[0]));
+                    petInfo.putExtra(KEY_PET, new Gson().toJson(pets[0]));
 
                     startActivity(petInfo);
                 }
             });
             petBtn2.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View view) {
                     if (pets[1].imageResource == Pet.DEFAULT_RESOURCE_VALUE) return;
 
-                    petInfo.putExtra(PET_KEY, new Gson().toJson(pets[1]));
+                    petInfo.putExtra(KEY_PET, new Gson().toJson(pets[1]));
 
                     startActivity(petInfo);
                 }

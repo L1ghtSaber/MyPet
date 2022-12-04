@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainMenuActivity"
-    android:background="@color/white">
+    android:background="@color/white"
+    tools:context=".MainMenuActivity">
 
     <TextView
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.075"/>
+        app:layout_constraintVertical_bias="0.075" />
 
 
     <FrameLayout
@@ -37,7 +37,7 @@
             android:layout_height="match_parent"
             android:background="@android:drawable/dialog_holo_light_frame"
             android:foreground="@drawable/main_menu_button_style"
-            android:onClick="startPetsActivity"/>
+            android:onClick="startPetsActivity" />
 
         <TextView
             android:layout_width="match_parent"
@@ -46,7 +46,7 @@
             android:text="@string/who_is_your_pet"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="25sp"/>
+            android:textSize="25sp" />
 
     </FrameLayout>
 
@@ -70,11 +70,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
+            android:onClick="startCalendarActivity"
             android:text="@string/calendar"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="25sp"
-            android:onClick="startCalendarActivity"/>
+            android:textSize="25sp" />
 
     </FrameLayout>
 

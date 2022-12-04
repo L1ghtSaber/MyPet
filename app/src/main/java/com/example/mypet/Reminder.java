@@ -21,14 +21,6 @@ import java.util.TreeMap;
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class Reminder {
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
-
-    public static final int MODE_YEAR = 0;
-    public static final int MODE_MONTH = 1;
-    public static final int MODE_DAY = 2;
-    public static final int MODE_HOUR = 3;
-    public static final int MODE_MINUTE = 4;
-
     public String date, text;
     public String[] decomposedDate;
 
@@ -41,69 +33,80 @@ public class Reminder {
         if (!this.date.isEmpty()) setup();
     }
 
-    public static String getTime(String date, int mode, boolean withZeroAtBeginning) {
-        StringBuilder result = new StringBuilder(decomposeDate(date)[mode]);
-        if (!withZeroAtBeginning && result.charAt(0) == '0') result.deleteCharAt(0);
-
-        return result.toString();
-    }
-
-    public static long dateToMillis(String date) {
-        String[] decomposedDate = decomposeDate(date);
-        for (int i = 0; i < decomposedDate.length; i++)
-            if (decomposedDate[i].equals("")) decomposedDate[i] = "00";
-
-        date = decomposedDate[0] + "-" +  // yyyy
-                decomposedDate[1] + "-" + // MM
-                decomposedDate[2] + " " + // dd
-                decomposedDate[3] + ":" + // HH
-                decomposedDate[4];        // mm
-
-        LocalDateTime localDateTime = LocalDateTime.parse(date,
-                DateTimeFormatter.ofPattern(DATE_FORMAT));
-
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
-
-    private static String[] decomposeDate(String date) {
-        String[] decomposedDate = new String[5];
-        Arrays.fill(decomposedDate, "");
-
-        for (int i = 0, count = 0; count < decomposedDate.length && i < date.length(); i++) {
-            char currentChar = date.charAt(i);
-
-            if (!Character.isDigit(currentChar)) count++;
-            else decomposedDate[count] += currentChar;
-        }
-
-        return decomposedDate;
-    }
-
-    public String getYearMonthDay() { // yyyy-MM-dd
-        return decomposedDate[MODE_YEAR] + "-" + decomposedDate[MODE_MONTH] + "-" + decomposedDate[MODE_DAY];
-    }
-
-    public String getHourMinute() { // HH:mm
-        return decomposedDate[MODE_HOUR] + ":" + decomposedDate[MODE_MINUTE];
-    }
-
-    public String getDayMonthYear() { // dd.MM.yy
-        String year = decomposedDate[MODE_YEAR];
-        return decomposedDate[MODE_DAY] + "." + decomposedDate[MODE_MONTH] + "." +
-                year.charAt(year.length() - 2) + year.charAt(year.length() - 1);
-    }
-
     public void setup() {
-        decomposedDate = decomposeDate(date);
+        decomposedDate = DateAndTime.decomposeDate(date);
         dateInMillis = dateToMillis();
-        dateInMillisYMD = dateToMillis(getYearMonthDay());
+        dateInMillisYMD = DateAndTime.dateToMillis(getYearMonthDay());
     }
 
     public long dateToMillis() {
-        return dateToMillis(date);
+        return DateAndTime.dateToMillis(date);
     }
 
-    static class Comparator implements java.util.Comparator<Reminder> {
+    public String getYearMonthDay() { // yyyy-MM-dd
+        return decomposedDate[DateAndTime.MODE_YEAR] + "-" + decomposedDate[DateAndTime.MODE_MONTH] + "-" + decomposedDate[DateAndTime.MODE_DAY];
+    }
+
+    public String getHourMinute() { // HH:mm
+        return decomposedDate[DateAndTime.MODE_HOUR] + ":" + decomposedDate[DateAndTime.MODE_MINUTE];
+    }
+
+    public String getDayMonthYear() { // dd.MM.yy
+        String year = decomposedDate[DateAndTime.MODE_YEAR];
+        return decomposedDate[DateAndTime.MODE_DAY] + "." + decomposedDate[DateAndTime.MODE_MONTH] + "." +
+                year.charAt(year.length() - 2) + year.charAt(year.length() - 1);
+    }
+
+    public static class DateAndTime {
+
+        public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
+
+        public static final int MODE_YEAR = 0;
+        public static final int MODE_MONTH = 1;
+        public static final int MODE_DAY = 2;
+        public static final int MODE_HOUR = 3;
+        public static final int MODE_MINUTE = 4;
+
+        public static String getTime(String date, int mode, boolean withZeroAtBeginning) {
+            StringBuilder result = new StringBuilder(decomposeDate(date)[mode]);
+            if (!withZeroAtBeginning && result.charAt(0) == '0') result.deleteCharAt(0);
+
+            return result.toString();
+        }
+
+        public static long dateToMillis(String date) {
+            String[] decomposedDate = decomposeDate(date);
+            for (int i = 0; i < decomposedDate.length; i++)
+                if (decomposedDate[i].equals("")) decomposedDate[i] = "00";
+
+            date = decomposedDate[0] + "-" +  // yyyy
+                    decomposedDate[1] + "-" + // MM
+                    decomposedDate[2] + " " + // dd
+                    decomposedDate[3] + ":" + // HH
+                    decomposedDate[4];        // mm
+
+            LocalDateTime localDateTime = LocalDateTime.parse(date,
+                    DateTimeFormatter.ofPattern(DATE_FORMAT));
+
+            return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+
+        public static String[] decomposeDate(String date) {
+            String[] decomposedDate = new String[5];
+            Arrays.fill(decomposedDate, "");
+
+            for (int i = 0, count = 0; count < decomposedDate.length && i < date.length(); i++) {
+                char currentChar = date.charAt(i);
+
+                if (!Character.isDigit(currentChar)) count++;
+                else decomposedDate[count] += currentChar;
+            }
+
+            return decomposedDate;
+        }
+    }
+
+    public static class Comparator implements java.util.Comparator<Reminder> {
 
         @Override
         public int compare(Reminder r1, Reminder r2) {

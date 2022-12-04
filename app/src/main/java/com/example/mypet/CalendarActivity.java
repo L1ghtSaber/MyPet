@@ -125,18 +125,18 @@ public class CalendarActivity extends AppCompatActivity {
                 ((TextView) container.titlesContainer.getChildAt(i)).setText(daysOfWeek[i]);
         }
 
-        String yearMin = Reminder.getTime(minMaxYearMonth[0].toString(),
-                        Reminder.MODE_YEAR, false),
-                monthMin = Reminder.getTime(minMaxYearMonth[0].toString(),
-                        Reminder.MODE_MONTH, false),
-                yearMax = Reminder.getTime(minMaxYearMonth[1].toString(),
-                        Reminder.MODE_YEAR, false),
-                monthMax = Reminder.getTime(minMaxYearMonth[1].toString(),
-                        Reminder.MODE_MONTH, false),
-                year = Reminder.getTime(calendarMonth.getYearMonth().toString(),
-                        Reminder.MODE_YEAR, false),
-                month = Reminder.getTime(calendarMonth.getYearMonth().toString(),
-                        Reminder.MODE_MONTH, false);
+        String yearMin = Reminder.DateAndTime.getTime(minMaxYearMonth[0].toString(),
+                        Reminder.DateAndTime.MODE_YEAR, false),
+                monthMin = Reminder.DateAndTime.getTime(minMaxYearMonth[0].toString(),
+                        Reminder.DateAndTime.MODE_MONTH, false),
+                yearMax = Reminder.DateAndTime.getTime(minMaxYearMonth[1].toString(),
+                        Reminder.DateAndTime.MODE_YEAR, false),
+                monthMax = Reminder.DateAndTime.getTime(minMaxYearMonth[1].toString(),
+                        Reminder.DateAndTime.MODE_MONTH, false),
+                year = Reminder.DateAndTime.getTime(calendarMonth.getYearMonth().toString(),
+                        Reminder.DateAndTime.MODE_YEAR, false),
+                month = Reminder.DateAndTime.getTime(calendarMonth.getYearMonth().toString(),
+                        Reminder.DateAndTime.MODE_MONTH, false);
 
         ((TextView) container.getView().findViewById(R.id.calendar_month_TV))
                 .setText(months[Integer.parseInt(month) - 1]);
@@ -234,14 +234,15 @@ public class CalendarActivity extends AppCompatActivity {
                 TextView day = container.getView().findViewById(R.id.calendar_day_TV);
 
                 if (calendarDay.getPosition() == DayPosition.MonthDate) {
-                    day.setText(Reminder.getTime(calendarDay.getDate().toString(), Reminder.MODE_DAY, false));
+                    day.setText(Reminder.DateAndTime.getTime(calendarDay.getDate().toString(),
+                            Reminder.DateAndTime.MODE_DAY, false));
 
                     if (calendarDay.getDate().isBefore(LocalDate.now())) {
                         day.setTextColor(getResources().getColor(R.color.gray));
                         return;
                     }
 
-                    if (Reminder.Manager.reminderExist(Reminder.dateToMillis(calendarDay.getDate().toString()))) {
+                    if (Reminder.Manager.reminderExist(Reminder.DateAndTime.dateToMillis(calendarDay.getDate().toString()))) {
                         selectDay(day, CalendarActivity.this);
                         container.selected = true;
                     } else {
@@ -256,7 +257,7 @@ public class CalendarActivity extends AppCompatActivity {
                             if (!container.selected) return;
 
                             Reminder reminder = Reminder.Manager.reminderMapYMD
-                                    .get(Reminder.dateToMillis(calendarDay.getDate().toString()));
+                                    .get(Reminder.DateAndTime.dateToMillis(calendarDay.getDate().toString()));
                             int index = Reminder.Manager.reminders.indexOf(reminder);
 
                             reminders.smoothScrollToPosition(index);

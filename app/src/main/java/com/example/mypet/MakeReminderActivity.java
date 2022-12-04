@@ -125,7 +125,7 @@ public class MakeReminderActivity extends AppCompatActivity {
                 TextView day = container.getView().findViewById(R.id.calendar_day_TV);
 
                 if (calendarDay.getPosition() == DayPosition.MonthDate) {
-                    day.setText(Reminder.DateAndTime.getTime(calendarDay.getDate().toString(), Reminder.MODE_DAY, false));
+                    day.setText(Reminder.DateAndTime.getTime(calendarDay.getDate().toString(), Reminder.DateAndTime.MODE_DAY, false));
 
                     if (calendarDay.getDate().isBefore(LocalDate.now())) {
                         day.setTextColor(getResources().getColor(R.color.gray));

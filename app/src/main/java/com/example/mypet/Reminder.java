@@ -79,11 +79,7 @@ public class Reminder {
             for (int i = 0; i < decomposedDate.length; i++)
                 if (decomposedDate[i].equals("")) decomposedDate[i] = "00";
 
-            date = decomposedDate[0] + "-" +  // yyyy
-                    decomposedDate[1] + "-" + // MM
-                    decomposedDate[2] + " " + // dd
-                    decomposedDate[3] + ":" + // HH
-                    decomposedDate[4];        // mm
+            date = formatDate(decomposedDate);
 
             LocalDateTime localDateTime = LocalDateTime.parse(date,
                     DateTimeFormatter.ofPattern(DATE_FORMAT));
@@ -103,6 +99,22 @@ public class Reminder {
             }
 
             return decomposedDate;
+        }
+
+        private static String formatDate(String[] decomposedDate) {
+            while (decomposedDate[0].length() < 4)
+                decomposedDate[0] = "0" + decomposedDate[0];
+
+            for (int i = 1; i < decomposedDate.length; i++) {
+                while (decomposedDate[i].length() < 2)
+                    decomposedDate[i] = "0" + decomposedDate[i];
+            }
+
+            return decomposedDate[0] + "-" +  // yyyy
+                    decomposedDate[1] + "-" + // MM
+                    decomposedDate[2] + " " + // dd
+                    decomposedDate[3] + ":" + // HH
+                    decomposedDate[4];
         }
     }
 

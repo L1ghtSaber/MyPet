@@ -25,6 +25,7 @@ import com.kizitonwose.calendar.core.CalendarDay;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.core.DayPosition;
 import com.kizitonwose.calendar.view.CalendarView;
+import com.kizitonwose.calendar.view.DaySize;
 import com.kizitonwose.calendar.view.MonthDayBinder;
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder;
 
@@ -89,6 +90,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         calendar.scrollToDate(LocalDate.now());
         calendar.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        calendar.setDaySize(DaySize.Square);
     }
 
     private static YearMonth[] getMinMaxYearMonth() {

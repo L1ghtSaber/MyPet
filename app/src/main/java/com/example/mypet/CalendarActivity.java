@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.kizitonwose.calendar.core.CalendarDay;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.core.DayPosition;
@@ -38,7 +39,7 @@ import java.util.ArrayList;
 public class CalendarActivity extends AppCompatActivity {
 
     public static final String KEY_MODE = "mode";
-    public static final String KEY_REMINDER_NUMBER = "reminderNumber";
+    public static final String KEY_REMINDER = "reminder";
 
     public static final int MODE_ADD = 0;
     public static final int MODE_EDIT = 1;
@@ -66,10 +67,7 @@ public class CalendarActivity extends AppCompatActivity {
         addReminderCircle.setBackground(circle);
 
         remindersTitle = findViewById(R.id.reminders_title_TV);
-        setRemindersTitleText();
-
         reminders = findViewById(R.id.reminders_LV);
-        reminders.setAdapter(new ReminderAdapter(this, Reminder.Manager.reminders));
 
         calendar = findViewById(R.id.readable_calendar_CV_lib);
         fullCalendarViewSetup(calendar);
@@ -79,9 +77,8 @@ public class CalendarActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
 
-        setRemindersTitleText();
-        reminders.setAdapter(new ReminderAdapter(this, Reminder.Manager.reminders));
         fullCalendarViewSetup(calendar);
+        setRemindersListView(new ArrayList<>());
     }
 
     public static void setupCalendarView(CalendarView calendar) {
@@ -256,13 +253,25 @@ public class CalendarActivity extends AppCompatActivity {
 
                         @Override
                         public void onClick(View view) {
-                            if (!container.selected) return;
+                            if (!container.selected) {
+                                setRemindersListView(new ArrayList<>());
+                                return;
+                            }
 
-                            Reminder reminder = Reminder.Manager.reminderMapYMD
-                                    .get(Reminder.DateAndTime.dateToMillis(calendarDay.getDate().toString()));
-                            int index = Reminder.Manager.reminders.indexOf(reminder);
+                            ArrayList<Reminder> reminderAL = new ArrayList<>();
+                            long dateInMillisYMD = Reminder.DateAndTime.dateToMillis(calendarDay.getDate().toString());
+                            boolean dateFound = false;
 
-                            reminders.smoothScrollToPosition(index);
+                            for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
+                                Reminder reminder = Reminder.Manager.reminders.get(i);
+
+                                if (reminder.dateInMillisYMD == dateInMillisYMD) {
+                                    dateFound = true;
+                                    reminderAL.add(reminder);
+                                } else if (dateFound) break;
+                            }
+
+                            setRemindersListView(reminderAL);
                         }
                     });
                 } else
@@ -284,11 +293,13 @@ public class CalendarActivity extends AppCompatActivity {
         });
     }
 
-    private void setRemindersTitleText() {
-        if (!Reminder.Manager.reminders.isEmpty())
+    private void setRemindersListView(ArrayList<Reminder> reminders) {
+        this.reminders.setAdapter(new ReminderAdapter(this, reminders));
+
+        if (!reminders.isEmpty())
             remindersTitle.setText("Напоминания");
         else
-            remindersTitle.setText("Напоминаний нет");
+            remindersTitle.setText("");
     }
 
     private class ReminderAdapter extends ArrayAdapter<Reminder> {
@@ -305,36 +316,10 @@ public class CalendarActivity extends AppCompatActivity {
             if (convertView == null)
                 convertView = LayoutInflater.from(CalendarActivity.this).inflate(R.layout.reminder_item, null);
 
-            TextView reminderDate = convertView.findViewById(R.id.reminder_date_TV),
-                    reminderTime = convertView.findViewById(R.id.reminder_time_TV),
-                    reminderText = convertView.findViewById(R.id.reminder_text_TV);
 
-            reminderDate.setText(reminder.getDayMonthYear());
-            reminderDate.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    scrollToDate(reminder);
-                }
-            });
-
-            reminderTime.setText(reminder.getHourMinute());
-            reminderTime.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    scrollToDate(reminder);
-                }
-            });
-
-            reminderText.setText(reminder.text);
-            reminderText.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    scrollToDate(reminder);
-                }
-            });
+            ((TextView) convertView.findViewById(R.id.reminder_date_TV)).setText(reminder.getDayMonthYear());
+            ((TextView) convertView.findViewById(R.id.reminder_time_TV)).setText(reminder.getHourMinute());
+            ((TextView) convertView.findViewById(R.id.reminder_text_TV)).setText(reminder.text);
 
             ((ImageButton) convertView.findViewById(R.id.edit_reminder_IB)).setOnClickListener(new View.OnClickListener() {
 
@@ -343,17 +328,13 @@ public class CalendarActivity extends AppCompatActivity {
                     Intent makeReminder = new Intent(CalendarActivity.this, MakeReminderActivity.class);
 
                     makeReminder.putExtra(KEY_MODE, MODE_EDIT);
-                    makeReminder.putExtra(KEY_REMINDER_NUMBER, position);
+                    makeReminder.putExtra(KEY_REMINDER, new Gson().toJson(reminder));
 
                     startActivity(makeReminder);
                 }
             });
 
             return convertView;
-        }
-
-        private void scrollToDate(Reminder reminder) {
-            calendar.smoothScrollToDate(LocalDate.parse(reminder.getYearMonthDay()));
         }
     }
 }

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.kizitonwose.calendar.core.CalendarDay;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.core.DayPosition;
@@ -81,8 +82,7 @@ public class MakeReminderActivity extends AppCompatActivity {
             makeReminder.setText("Добавить");
             makeReminder.setTextColor(getResources().getColor(R.color.gray));
         } else if (mode == CalendarActivity.MODE_EDIT) {
-            int index = getIntent().getIntExtra(CalendarActivity.KEY_REMINDER_NUMBER, 0);
-            reminder = Reminder.Manager.reminders.get(index);
+            reminder = new Gson().fromJson(getIntent().getStringExtra(CalendarActivity.KEY_REMINDER), Reminder.class);
 
             time.setTime(new Date(reminder.dateInMillis));
 
@@ -96,7 +96,7 @@ public class MakeReminderActivity extends AppCompatActivity {
             deleteReminder.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Reminder.Manager.reminders.remove(index);
+                    Reminder.Manager.reminders.remove(getReminderIndex(reminder));
 
                     Reminder.Manager.sortReminders();
                     Reminder.Manager.saveReminders(MakeReminderActivity.this);
@@ -222,22 +222,36 @@ public class MakeReminderActivity extends AppCompatActivity {
             return;
         }
 
+        Reminder oldReminder = new Reminder(reminder);
+
         reminder.text = reminderText.getText().toString();
 
-        String time = reminderTime.getText().toString(),
-                hour = time.charAt(0) + "" + time.charAt(1), // я просто знаю, что время будет в формате HH:mm
-                minute = time.charAt(3) + "" + time.charAt(4);
-
-        reminder.date = selectedDate + " " + hour + ":" + minute;
+        reminder.date = selectedDate + " " + DateUtils
+                .formatDateTime(this, this.time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 
         if (mode == CalendarActivity.MODE_ADD)
             Reminder.Manager.reminders.add(new Reminder(reminder.date, reminder.text));
-        else if (mode == CalendarActivity.MODE_EDIT)
+        else if (mode == CalendarActivity.MODE_EDIT) {
             reminder.setup();
+
+            int index = getReminderIndex(oldReminder);
+            if (index >= 0) Reminder.Manager.reminders.set(index, reminder);
+        }
 
         Reminder.Manager.sortReminders();
         Reminder.Manager.saveReminders(this);
 
         finish();
+    }
+
+    private int getReminderIndex(Reminder reminder) {
+        for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
+            Reminder currentReminder = Reminder.Manager.reminders.get(i);
+            if (currentReminder.dateInMillis == reminder.dateInMillis
+                    && currentReminder.text.equals(reminder.text))
+                return i;
+        }
+
+        return -1;
     }
 }

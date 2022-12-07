@@ -1,5 +1,6 @@
 package com.example.mypet;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 
@@ -10,6 +11,7 @@ import com.google.gson.Gson;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.TreeMap;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
+@TargetApi(Build.VERSION_CODES.O)
 public class Reminder {
 
     public String date, text;
@@ -31,6 +33,14 @@ public class Reminder {
         this.text = text;
 
         if (!this.date.isEmpty()) setup();
+    }
+
+    public Reminder(Reminder reminder) {
+        date = reminder.date;
+        text = reminder.text;
+        decomposedDate = reminder.decomposedDate;
+        dateInMillis = reminder.dateInMillis;
+        dateInMillisYMD = reminder.dateInMillisYMD;
     }
 
     public void setup() {
@@ -75,13 +85,7 @@ public class Reminder {
         }
 
         public static long dateToMillis(String date) {
-            String[] decomposedDate = decomposeDate(date);
-            for (int i = 0; i < decomposedDate.length; i++)
-                if (decomposedDate[i].equals("")) decomposedDate[i] = "00";
-
-            date = formatDate(decomposedDate);
-
-            LocalDateTime localDateTime = LocalDateTime.parse(date,
+            LocalDateTime localDateTime = LocalDateTime.parse(formatDate(decomposeDate(date)),
                     DateTimeFormatter.ofPattern(DATE_FORMAT));
 
             return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -195,6 +199,8 @@ public class Reminder {
         }
 
         public static void saveReminders(Context context) {
+            deletePastReminders();
+
             String savedReminders = "";
             for (int i = 0; i < reminders.size(); i++) {
                 savedReminders += new Gson().toJson(reminders.get(i)) + "\n";
@@ -214,6 +220,16 @@ public class Reminder {
                 } catch (IOException e) {
                     //Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+            }
+        }
+
+        public static void deletePastReminders() {
+            long now = DateAndTime.dateToMillis(LocalDate.now().toString());
+
+            for (int i = 0; i < reminders.size(); i++) {
+                Reminder reminder = reminders.get(i);
+                if (reminder.dateInMillisYMD < now) reminders.remove(reminder);
+                else break;
             }
         }
     }

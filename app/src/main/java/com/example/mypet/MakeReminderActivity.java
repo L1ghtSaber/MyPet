@@ -1,9 +1,5 @@
 package com.example.mypet;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.TimePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,10 +9,13 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.kizitonwose.calendar.core.CalendarDay;
@@ -27,8 +26,12 @@ import com.kizitonwose.calendar.view.MonthDayBinder;
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class MakeReminderActivity extends AppCompatActivity {
@@ -74,7 +77,7 @@ public class MakeReminderActivity extends AppCompatActivity {
         });
 
         if (mode == CalendarActivity.MODE_ADD) {
-            reminder = new Reminder("", "");
+            reminder = new Reminder(new GregorianCalendar(), "");
 
             reminderTime.setText(DateUtils.formatDateTime(MakeReminderActivity.this,
                     time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME));
@@ -125,7 +128,8 @@ public class MakeReminderActivity extends AppCompatActivity {
                 TextView day = container.getView().findViewById(R.id.calendar_day_TV);
 
                 if (calendarDay.getPosition() == DayPosition.MonthDate) {
-                    day.setText(Reminder.DateAndTime.getTime(calendarDay.getDate().toString(), Reminder.DateAndTime.MODE_DAY, false));
+                    String out = "" + calendarDay.getDate().getDayOfMonth();
+                    day.setText(out);
 
                     if (calendarDay.getDate().isBefore(LocalDate.now())) {
                         day.setTextColor(getResources().getColor(R.color.gray));
@@ -225,9 +229,11 @@ public class MakeReminderActivity extends AppCompatActivity {
         Reminder oldReminder = new Reminder(reminder);
 
         reminder.text = reminderText.getText().toString();
-
-        reminder.date = selectedDate + " " + DateUtils
-                .formatDateTime(this, this.time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
+        // выглядит сложно, но на самом деле здесь просто парсится строка с датой и временем в миллисекунды
+        reminder.date.setTimeInMillis(LocalDateTime.parse(selectedDate + " " + DateUtils
+                .formatDateTime(this, this.time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME),
+                DateTimeFormatter.ofPattern(Reminder.DATE_FORMAT))
+                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 
         if (mode == CalendarActivity.MODE_ADD)
             Reminder.Manager.reminders.add(new Reminder(reminder.date, reminder.text));

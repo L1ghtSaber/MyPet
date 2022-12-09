@@ -1,6 +1,6 @@
 package com.example.mypet;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 
@@ -11,115 +11,56 @@ import com.google.gson.Gson;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.TreeMap;
 
-@TargetApi(Build.VERSION_CODES.O)
+
+@RequiresApi(api = Build.VERSION_CODES.O)
+@SuppressLint("SimpleDateFormat")
 public class Reminder {
 
-    public String date, text;
-    public String[] decomposedDate;
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
+
+    public GregorianCalendar date;
+    public String text;
 
     public long dateInMillis, dateInMillisYMD; // YMD - Year Month Day
 
-    public Reminder(String date, String text) {
+    public Reminder(GregorianCalendar date, String text) {
         this.date = date;
         this.text = text;
 
-        if (!this.date.isEmpty()) setup();
+        if (this.date != null) setup();
     }
 
     public Reminder(Reminder reminder) {
         date = reminder.date;
         text = reminder.text;
-        decomposedDate = reminder.decomposedDate;
         dateInMillis = reminder.dateInMillis;
         dateInMillisYMD = reminder.dateInMillisYMD;
     }
 
     public void setup() {
-        decomposedDate = DateAndTime.decomposeDate(date);
-        dateInMillis = dateToMillis();
-        dateInMillisYMD = DateAndTime.dateToMillis(getYearMonthDay());
+        dateInMillis = date.getTimeInMillis();
+        dateInMillisYMD = LocalDateTime.ofInstant(date.toInstant(),
+                date.getTimeZone().toZoneId()).toLocalDate().toEpochDay();
     }
 
-    public long dateToMillis() {
-        return DateAndTime.dateToMillis(date);
+    public String getYearMonthDay() {
+        return new SimpleDateFormat("yyyy-MM-dd").format(date.getTime());
     }
 
-    public String getYearMonthDay() { // yyyy-MM-dd
-        return decomposedDate[DateAndTime.MODE_YEAR] + "-" + decomposedDate[DateAndTime.MODE_MONTH] + "-" + decomposedDate[DateAndTime.MODE_DAY];
+    public String getHourMinute() {
+        return new SimpleDateFormat("HH:mm").format(date.getTime());
     }
 
-    public String getHourMinute() { // HH:mm
-        return decomposedDate[DateAndTime.MODE_HOUR] + ":" + decomposedDate[DateAndTime.MODE_MINUTE];
-    }
-
-    public String getDayMonthYear() { // dd.MM.yy
-        String year = decomposedDate[DateAndTime.MODE_YEAR];
-        return decomposedDate[DateAndTime.MODE_DAY] + "." + decomposedDate[DateAndTime.MODE_MONTH] + "." +
-                year.charAt(year.length() - 2) + year.charAt(year.length() - 1);
-    }
-
-    public static class DateAndTime {
-
-        public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
-
-        public static final int MODE_YEAR = 0;
-        public static final int MODE_MONTH = 1;
-        public static final int MODE_DAY = 2;
-        public static final int MODE_HOUR = 3;
-        public static final int MODE_MINUTE = 4;
-
-        public static String getTime(String date, int mode, boolean withZeroAtBeginning) {
-            StringBuilder result = new StringBuilder(decomposeDate(date)[mode]);
-            if (!withZeroAtBeginning && result.charAt(0) == '0') result.deleteCharAt(0);
-
-            return result.toString();
-        }
-
-        public static long dateToMillis(String date) {
-            LocalDateTime localDateTime = LocalDateTime.parse(formatDate(decomposeDate(date)),
-                    DateTimeFormatter.ofPattern(DATE_FORMAT));
-
-            return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        }
-
-        public static String[] decomposeDate(String date) {
-            String[] decomposedDate = new String[5];
-            Arrays.fill(decomposedDate, "");
-
-            for (int i = 0, count = 0; count < decomposedDate.length && i < date.length(); i++) {
-                char currentChar = date.charAt(i);
-
-                if (!Character.isDigit(currentChar)) count++;
-                else decomposedDate[count] += currentChar;
-            }
-
-            return decomposedDate;
-        }
-
-        private static String formatDate(String[] decomposedDate) {
-            while (decomposedDate[0].length() < 4)
-                decomposedDate[0] = "0" + decomposedDate[0];
-
-            for (int i = 1; i < decomposedDate.length; i++) {
-                while (decomposedDate[i].length() < 2)
-                    decomposedDate[i] = "0" + decomposedDate[i];
-            }
-
-            return decomposedDate[0] + "-" +  // yyyy
-                    decomposedDate[1] + "-" + // MM
-                    decomposedDate[2] + " " + // dd
-                    decomposedDate[3] + ":" + // HH
-                    decomposedDate[4];
-        }
+    public String getDayMonthYear() {
+        return new SimpleDateFormat("dd.MM.yy").format(date.getTime());
     }
 
     public static class Comparator implements java.util.Comparator<Reminder> {
@@ -206,25 +147,18 @@ public class Reminder {
                 savedReminders += new Gson().toJson(reminders.get(i)) + "\n";
             }
 
-            FileOutputStream file = null;
-            try {
-                file = context.openFileOutput(REMINDERS_FILE_NAME, Context.MODE_PRIVATE);
+            try (FileOutputStream file = context.openFileOutput(REMINDERS_FILE_NAME, Context.MODE_PRIVATE)) {
 
                 file.write(savedReminders.getBytes());
             } catch (IOException e) {
                 //Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-            } finally {
-
-                try {
-                    if (file != null) file.close();
-                } catch (IOException e) {
-                    //Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                }
             }
+
+            //Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         public static void deletePastReminders() {
-            long now = DateAndTime.dateToMillis(LocalDate.now().toString());
+            long now = LocalDate.now().toEpochDay();
 
             for (int i = 0; i < reminders.size(); i++) {
                 Reminder reminder = reminders.get(i);

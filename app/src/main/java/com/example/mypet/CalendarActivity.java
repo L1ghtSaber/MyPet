@@ -247,13 +247,13 @@ public class CalendarActivity extends AppCompatActivity {
                             }
 
                             ArrayList<Reminder> reminderAL = new ArrayList<>();
-                            long dateInMillisYMD = calendarDay.getDate().toEpochDay();
+                            long dateInMillis_yMd = calendarDay.getDate().toEpochDay();
                             boolean dateFound = false;
 
                             for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
                                 Reminder reminder = Reminder.Manager.reminders.get(i);
 
-                                if (reminder.dateInMillisYMD == dateInMillisYMD) {
+                                if (reminder.dateInMillis_yMd == dateInMillis_yMd) {
                                     dateFound = true;
                                     reminderAL.add(reminder);
                                 } else if (dateFound) break;

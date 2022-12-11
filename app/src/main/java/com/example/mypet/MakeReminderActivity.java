@@ -1,5 +1,6 @@
 package com.example.mypet;
 
+import android.annotation.SuppressLint;
 import android.app.TimePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import com.kizitonwose.calendar.view.CalendarView;
 import com.kizitonwose.calendar.view.MonthDayBinder;
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -42,7 +44,7 @@ public class MakeReminderActivity extends AppCompatActivity {
     private final DayViewContainer[] selectedDay = new DayViewContainer[1];
     private Reminder reminder;
     private Calendar time;
-    private String selectedDate = "";
+    private LocalDate selectedDate;
 
     private int mode;
 
@@ -127,23 +129,24 @@ public class MakeReminderActivity extends AppCompatActivity {
             public void bind(@NonNull DayViewContainer container, CalendarDay calendarDay) {
                 TextView day = container.getView().findViewById(R.id.calendar_day_TV);
 
+                LocalDate date = calendarDay.getDate(); // для оптимизации
                 if (calendarDay.getPosition() == DayPosition.MonthDate) {
-                    String out = "" + calendarDay.getDate().getDayOfMonth();
+                    String out = "" + date.getDayOfMonth();
                     day.setText(out);
 
-                    if (calendarDay.getDate().isBefore(LocalDate.now())) {
+                    if (date.isBefore(LocalDate.now())) {
                         day.setTextColor(getResources().getColor(R.color.gray));
                         return;
                     }
 
                     if (mode == CalendarActivity.MODE_EDIT
-                            && calendarDay.getDate().toString().equals(reminder.getYearMonthDay())) {
+                            && date.toEpochDay() == reminder.dateInMillis_yMd) {
                         CalendarActivity.selectDay(day, MakeReminderActivity.this);
 
                         selectedDay[0] = container;
                         selectedDay[0].selected = true;
 
-                        selectedDate = reminder.getYearMonthDay();
+                        selectedDate = date;
                     }
 
                     day.setOnClickListener(new View.OnClickListener() {
@@ -158,7 +161,8 @@ public class MakeReminderActivity extends AppCompatActivity {
                                     selectedDay[0].selected = false;
                                 }
                                 selectedDay[0] = container;
-                                selectedDate = calendarDay.getDate().toString();
+
+                                selectedDate = date;
                             } else CalendarActivity.unselectDay(day, MakeReminderActivity.this);
 
                             container.selected = !container.selected;
@@ -229,11 +233,14 @@ public class MakeReminderActivity extends AppCompatActivity {
         Reminder oldReminder = new Reminder(reminder);
 
         reminder.text = reminderText.getText().toString();
-        // выглядит сложно, но на самом деле здесь просто парсится строка с датой и временем в миллисекунды
-        reminder.date.setTimeInMillis(LocalDateTime.parse(selectedDate + " " + DateUtils
-                .formatDateTime(this, this.time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME),
-                DateTimeFormatter.ofPattern(Reminder.DATE_FORMAT))
-                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+        @SuppressLint("SimpleDateFormat")
+        int year = selectedDate.getYear(),
+                month = selectedDate.getMonthValue() - 1,
+                day = selectedDate.getDayOfMonth(),
+                hour = Integer.parseInt(new SimpleDateFormat(Reminder.DATE_FORMAT_H).format(time.getTimeInMillis())),
+                minute = Integer.parseInt(new SimpleDateFormat(Reminder.DATE_FORMAT_m).format(time.getTimeInMillis()));
+        reminder.date.set(year, month, day, hour, minute);
 
         if (mode == CalendarActivity.MODE_ADD)
             Reminder.Manager.reminders.add(new Reminder(reminder.date, reminder.text));

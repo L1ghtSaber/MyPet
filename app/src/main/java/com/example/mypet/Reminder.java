@@ -28,6 +28,11 @@ public class Reminder {
     public static final String DATE_FORMAT_yMd = "yyyy-MM-dd"; // yMd - year month day
     public static final String DATE_FORMAT_Hm = "HH:mm"; // Hm - hour minute
     public static final String DATE_FORMAT_dMy = "dd.MM.yy"; // dMy - day month year
+    public static final String DATE_FORMAT_y = "y"; // y - year
+    public static final String DATE_FORMAT_M = "M"; // M - month
+    public static final String DATE_FORMAT_d = "d"; // d - day
+    public static final String DATE_FORMAT_H = "H"; // H - hour
+    public static final String DATE_FORMAT_m = "m"; // m - minute
 
     public GregorianCalendar date;
     public String text;

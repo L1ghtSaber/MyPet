@@ -78,7 +78,6 @@ public class CalendarActivity extends AppCompatActivity {
         super.onRestart();
 
         fullCalendarViewSetup(calendar);
-        setRemindersListView(new ArrayList<>());
     }
 
     public static void setupCalendarView(CalendarView calendar) {
@@ -208,6 +207,8 @@ public class CalendarActivity extends AppCompatActivity {
 
     private void fullCalendarViewSetup(CalendarView calendar) {
         setupCalendarView(calendar);
+
+        long dayNow = LocalDate.now().toEpochDay(); // для оптимизации
         calendar.setDayBinder(new MonthDayBinder<DayViewContainer>() {
 
             @NonNull
@@ -224,7 +225,7 @@ public class CalendarActivity extends AppCompatActivity {
                     String out = "" + calendarDay.getDate().getDayOfMonth();
                     day.setText(out);
 
-                    if (calendarDay.getDate().isBefore(LocalDate.now())) {
+                    if (calendarDay.getDate().isBefore(LocalDate.ofEpochDay(dayNow))) {
                         day.setTextColor(getResources().getColor(R.color.gray));
                         return;
                     }
@@ -237,6 +238,9 @@ public class CalendarActivity extends AppCompatActivity {
                         container.selected = false;
                     }
 
+                    if (calendarDay.getDate().toEpochDay() == dayNow)
+                        setRemindersListView(getRemindersForDay(dayNow));
+
                     day.setOnClickListener(new View.OnClickListener() {
 
                         @Override
@@ -246,26 +250,32 @@ public class CalendarActivity extends AppCompatActivity {
                                 return;
                             }
 
-                            ArrayList<Reminder> reminderAL = new ArrayList<>();
                             long dateInMillis_yMd = calendarDay.getDate().toEpochDay();
-                            boolean dateFound = false;
 
-                            for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
-                                Reminder reminder = Reminder.Manager.reminders.get(i);
-
-                                if (reminder.dateInMillis_yMd == dateInMillis_yMd) {
-                                    dateFound = true;
-                                    reminderAL.add(reminder);
-                                } else if (dateFound) break;
-                            }
-
-                            setRemindersListView(reminderAL);
+                            setRemindersListView(getRemindersForDay(dateInMillis_yMd));
                         }
                     });
                 } else
                     day.setText("");
             }
+
+            private ArrayList<Reminder> getRemindersForDay(long dateInMillis_yMd) {
+                ArrayList<Reminder> reminders = new ArrayList<>();
+                boolean dateFound = false;
+
+                for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
+                    Reminder reminder = Reminder.Manager.reminders.get(i);
+
+                    if (reminder.dateInMillis_yMd == dateInMillis_yMd) {
+                        dateFound = true;
+                        reminders.add(reminder);
+                    } else if (dateFound) break;
+                }
+
+                return reminders;
+            }
         });
+
         calendar.setMonthHeaderBinder(new MonthHeaderFooterBinder<MonthViewContainer>() {
 
             @NonNull

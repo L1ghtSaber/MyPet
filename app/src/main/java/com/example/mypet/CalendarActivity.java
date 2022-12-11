@@ -78,7 +78,6 @@ public class CalendarActivity extends AppCompatActivity {
         super.onRestart();
 
         fullCalendarViewSetup(calendar);
-        setRemindersListView(new ArrayList<>());
     }
 
     public static void setupCalendarView(CalendarView calendar) {
@@ -124,23 +123,15 @@ public class CalendarActivity extends AppCompatActivity {
                 ((TextView) container.titlesContainer.getChildAt(i)).setText(daysOfWeek[i]);
         }
 
-        String yearMin = Reminder.DateAndTime.getTime(minMaxYearMonth[0].toString(),
-                        Reminder.DateAndTime.MODE_YEAR, false),
-                monthMin = Reminder.DateAndTime.getTime(minMaxYearMonth[0].toString(),
-                        Reminder.DateAndTime.MODE_MONTH, false),
-                yearMax = Reminder.DateAndTime.getTime(minMaxYearMonth[1].toString(),
-                        Reminder.DateAndTime.MODE_YEAR, false),
-                monthMax = Reminder.DateAndTime.getTime(minMaxYearMonth[1].toString(),
-                        Reminder.DateAndTime.MODE_MONTH, false),
-                year = Reminder.DateAndTime.getTime(calendarMonth.getYearMonth().toString(),
-                        Reminder.DateAndTime.MODE_YEAR, false),
-                month = Reminder.DateAndTime.getTime(calendarMonth.getYearMonth().toString(),
-                        Reminder.DateAndTime.MODE_MONTH, false);
+        int yearMin = minMaxYearMonth[0].getYear(), monthMin = minMaxYearMonth[0].getMonthValue(),
+                yearMax = minMaxYearMonth[1].getYear(), monthMax = minMaxYearMonth[1].getMonthValue(),
+                year = calendarMonth.getYearMonth().getYear(), month = calendarMonth.getYearMonth().getMonthValue();
 
         ((TextView) container.getView().findViewById(R.id.calendar_month_TV))
-                .setText(months[Integer.parseInt(month) - 1]);
+                .setText(months[month - 1]);
 
-        ((TextView) container.getView().findViewById(R.id.calendar_year_IB)).setText(year);
+        String out = "" + year;
+        ((TextView) container.getView().findViewById(R.id.calendar_year_IB)).setText(out);
 
         ImageButton previousYear = container.getView().findViewById(R.id.calendar_previous_year_IB),
                 nextYear = container.getView().findViewById(R.id.calendar_next_year_IB),
@@ -151,16 +142,14 @@ public class CalendarActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                calendar.smoothScrollToDate(LocalDate.of(Integer.parseInt(year) - 1,
-                        Integer.parseInt(month), 1));
+                calendar.smoothScrollToDate(LocalDate.of(year - 1, month, 1));
             }
         });
         nextYear.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                calendar.smoothScrollToDate(LocalDate.of(Integer.parseInt(year) + 1,
-                        Integer.parseInt(month), 1));
+                calendar.smoothScrollToDate(LocalDate.of(year + 1, month, 1));
             }
         });
         previousMonth.setOnClickListener(new View.OnClickListener() {
@@ -168,31 +157,29 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 calendar.smoothScrollToDate(LocalDate
-                        .of(Integer.parseInt(year) - ((Integer.parseInt(month) - 1 == 0) ? 1 : 0),
-                                ((Integer.parseInt(month) - 1 == 0) ? 12 : Integer.parseInt(month) - 1), 1));
+                        .of(year - ((month - 1 == 0) ? 1 : 0), (month - 1 == 0) ? 12 : month - 1, 1));
             }
         });
         nextMonth.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                calendar.smoothScrollToDate(LocalDate.of(Integer.parseInt(year) + Integer.parseInt(month) / 12,
-                        Integer.parseInt(month) % 12 + 1, 1));
+                calendar.smoothScrollToDate(LocalDate.of(year + month / 12, month % 12 + 1, 1));
             }
         });
 
 
 
-        if (year.equals(yearMin)) disableChangeDateButton(previousYear);
+        if (year == yearMin) disableChangeDateButton(previousYear);
         else enableChangeDateButton(previousYear, true);
 
-        if (year.equals(yearMax)) disableChangeDateButton(nextYear);
+        if (year == yearMax) disableChangeDateButton(nextYear);
         else enableChangeDateButton(nextYear, true);
 
-        if (year.equals(yearMin) && month.equals(monthMin)) disableChangeDateButton(previousMonth);
+        if (year == yearMin && month == monthMin) disableChangeDateButton(previousMonth);
         else enableChangeDateButton(previousMonth, false);
 
-        if (year.equals(yearMax) && month.equals(monthMax)) disableChangeDateButton(nextMonth);
+        if (year == yearMax && month == monthMax) disableChangeDateButton(nextMonth);
         else enableChangeDateButton(nextMonth, false);
     }
 
@@ -220,6 +207,8 @@ public class CalendarActivity extends AppCompatActivity {
 
     private void fullCalendarViewSetup(CalendarView calendar) {
         setupCalendarView(calendar);
+
+        long dayNow = LocalDate.now().toEpochDay(); // для оптимизации
         calendar.setDayBinder(new MonthDayBinder<DayViewContainer>() {
 
             @NonNull
@@ -233,21 +222,24 @@ public class CalendarActivity extends AppCompatActivity {
                 TextView day = container.getView().findViewById(R.id.calendar_day_TV);
 
                 if (calendarDay.getPosition() == DayPosition.MonthDate) {
-                    day.setText(Reminder.DateAndTime.getTime(calendarDay.getDate().toString(),
-                            Reminder.DateAndTime.MODE_DAY, false));
+                    String out = "" + calendarDay.getDate().getDayOfMonth();
+                    day.setText(out);
 
-                    if (calendarDay.getDate().isBefore(LocalDate.now())) {
+                    if (calendarDay.getDate().isBefore(LocalDate.ofEpochDay(dayNow))) {
                         day.setTextColor(getResources().getColor(R.color.gray));
                         return;
                     }
 
-                    if (Reminder.Manager.reminderExist(Reminder.DateAndTime.dateToMillis(calendarDay.getDate().toString()))) {
+                    if (Reminder.Manager.reminderExist(calendarDay.getDate().toEpochDay())) {
                         selectDay(day, CalendarActivity.this);
                         container.selected = true;
                     } else {
                         unselectDay(day, CalendarActivity.this);
                         container.selected = false;
                     }
+
+                    if (calendarDay.getDate().toEpochDay() == dayNow)
+                        setRemindersListView(getRemindersForDay(dayNow));
 
                     day.setOnClickListener(new View.OnClickListener() {
 
@@ -258,26 +250,32 @@ public class CalendarActivity extends AppCompatActivity {
                                 return;
                             }
 
-                            ArrayList<Reminder> reminderAL = new ArrayList<>();
-                            long dateInMillisYMD = Reminder.DateAndTime.dateToMillis(calendarDay.getDate().toString());
-                            boolean dateFound = false;
+                            long dateInMillis_yMd = calendarDay.getDate().toEpochDay();
 
-                            for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
-                                Reminder reminder = Reminder.Manager.reminders.get(i);
-
-                                if (reminder.dateInMillisYMD == dateInMillisYMD) {
-                                    dateFound = true;
-                                    reminderAL.add(reminder);
-                                } else if (dateFound) break;
-                            }
-
-                            setRemindersListView(reminderAL);
+                            setRemindersListView(getRemindersForDay(dateInMillis_yMd));
                         }
                     });
                 } else
                     day.setText("");
             }
+
+            private ArrayList<Reminder> getRemindersForDay(long dateInMillis_yMd) {
+                ArrayList<Reminder> reminders = new ArrayList<>();
+                boolean dateFound = false;
+
+                for (int i = 0; i < Reminder.Manager.reminders.size(); i++) {
+                    Reminder reminder = Reminder.Manager.reminders.get(i);
+
+                    if (reminder.dateInMillis_yMd == dateInMillis_yMd) {
+                        dateFound = true;
+                        reminders.add(reminder);
+                    } else if (dateFound) break;
+                }
+
+                return reminders;
+            }
         });
+
         calendar.setMonthHeaderBinder(new MonthHeaderFooterBinder<MonthViewContainer>() {
 
             @NonNull

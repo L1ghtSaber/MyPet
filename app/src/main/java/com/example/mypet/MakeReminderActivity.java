@@ -1,9 +1,6 @@
 package com.example.mypet;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.annotation.SuppressLint;
 import android.app.TimePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,10 +10,13 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.kizitonwose.calendar.core.CalendarDay;
@@ -26,9 +26,11 @@ import com.kizitonwose.calendar.view.CalendarView;
 import com.kizitonwose.calendar.view.MonthDayBinder;
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class MakeReminderActivity extends AppCompatActivity {
@@ -39,7 +41,7 @@ public class MakeReminderActivity extends AppCompatActivity {
     private final DayViewContainer[] selectedDay = new DayViewContainer[1];
     private Reminder reminder;
     private Calendar time;
-    private String selectedDate = "";
+    private LocalDate selectedDate;
 
     private int mode;
 
@@ -74,7 +76,7 @@ public class MakeReminderActivity extends AppCompatActivity {
         });
 
         if (mode == CalendarActivity.MODE_ADD) {
-            reminder = new Reminder("", "");
+            reminder = new Reminder(new GregorianCalendar(), "");
 
             reminderTime.setText(DateUtils.formatDateTime(MakeReminderActivity.this,
                     time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME));
@@ -124,22 +126,24 @@ public class MakeReminderActivity extends AppCompatActivity {
             public void bind(@NonNull DayViewContainer container, CalendarDay calendarDay) {
                 TextView day = container.getView().findViewById(R.id.calendar_day_TV);
 
+                LocalDate date = calendarDay.getDate(); // для оптимизации
                 if (calendarDay.getPosition() == DayPosition.MonthDate) {
-                    day.setText(Reminder.DateAndTime.getTime(calendarDay.getDate().toString(), Reminder.DateAndTime.MODE_DAY, false));
+                    String out = "" + date.getDayOfMonth();
+                    day.setText(out);
 
-                    if (calendarDay.getDate().isBefore(LocalDate.now())) {
+                    if (date.isBefore(LocalDate.now())) {
                         day.setTextColor(getResources().getColor(R.color.gray));
                         return;
                     }
 
                     if (mode == CalendarActivity.MODE_EDIT
-                            && calendarDay.getDate().toString().equals(reminder.getYearMonthDay())) {
+                            && date.toEpochDay() == reminder.dateInMillis_yMd) {
                         CalendarActivity.selectDay(day, MakeReminderActivity.this);
 
                         selectedDay[0] = container;
                         selectedDay[0].selected = true;
 
-                        selectedDate = reminder.getYearMonthDay();
+                        selectedDate = date;
                     }
 
                     day.setOnClickListener(new View.OnClickListener() {
@@ -154,7 +158,8 @@ public class MakeReminderActivity extends AppCompatActivity {
                                     selectedDay[0].selected = false;
                                 }
                                 selectedDay[0] = container;
-                                selectedDate = calendarDay.getDate().toString();
+
+                                selectedDate = date;
                             } else CalendarActivity.unselectDay(day, MakeReminderActivity.this);
 
                             container.selected = !container.selected;
@@ -226,8 +231,13 @@ public class MakeReminderActivity extends AppCompatActivity {
 
         reminder.text = reminderText.getText().toString();
 
-        reminder.date = selectedDate + " " + DateUtils
-                .formatDateTime(this, this.time.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
+        @SuppressLint("SimpleDateFormat")
+        int year = selectedDate.getYear(),
+                month = selectedDate.getMonthValue() - 1,
+                day = selectedDate.getDayOfMonth(),
+                hour = Integer.parseInt(new SimpleDateFormat(Reminder.DATE_FORMAT_H).format(time.getTimeInMillis())),
+                minute = Integer.parseInt(new SimpleDateFormat(Reminder.DATE_FORMAT_m).format(time.getTimeInMillis()));
+        reminder.date.set(year, month, day, hour, minute);
 
         if (mode == CalendarActivity.MODE_ADD)
             Reminder.Manager.reminders.add(new Reminder(reminder.date, reminder.text));
